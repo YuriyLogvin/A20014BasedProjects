@@ -18,6 +18,7 @@ ProtocolHost::ProtocolHost( EmkAddr address )
 		_AddressSelf[i] = EmkAddr::Broadcast;
 	_AddressSelf[0] = address;
 	_AddressDest = address;
+	_AddressPacket = EmkAddr::Broadcast;
 	_SendingState = None;
 	_DataBufferLength = 32;
 	_DataBuffer = new unsigned char[_DataBufferLength];

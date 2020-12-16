@@ -19,7 +19,7 @@ class Stm32UsartDmaIt {
 	friend void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 	uint16_t _SendBufSize;
 	ReceiveBuffer* _ReceiveBuffer;
-	uint16_t _Rbyte;
+	uint8_t _Rbyte;
 	uint8_t* _UsartSendBuff;
 	UART_HandleTypeDef* _Huart;
 	GPIO_TypeDef* _TxEnPort;

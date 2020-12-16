@@ -28,6 +28,7 @@ class Kernel : public IDataTransmitter {
 	static void _ProcessDataPacket();
 	static void _TransmitData2Display();
 	static bool _TransmitValue2Display(const char* valName, int16_t& val);
+	static bool _TransmitEvent2Display(const char* evName, int16_t& val);
 	static const char* _ReceiveValueFromDisplay(int16_t& val);
 public:
 	Kernel() {};

@@ -70,10 +70,9 @@ void tskTransmit2UartStart(void const * argument)
 
 void Kernel::Init()
 {
-	_ProtocolHost = new ProtocolHost(EmkAddr::Display);
-	//_ProtocolHost->AddSelfAddr(EmkAddr::CurrentSensor);
-	//_ProtocolHost->AddSelfAddr(EmkAddr::VoltageSensor);
-	_ProtocolHost->DestAddr(EmkAddr::Host);
+	_ProtocolHost = new ProtocolHost(EmkAddr::Host);
+
+	_ProtocolHost->DestAddr(EmkAddr::MotorController);
 
 	_ReceiveMetodHost = new ReceiveMetodHost();
 
@@ -82,6 +81,15 @@ void Kernel::Init()
 }
 
 int32_t _KernelTicks = 0;
+
+static int16_t _VoltageNeed = 0;
+static int16_t _VoltageHave = 0;
+static int16_t _CurrentNeed = 0;
+static int16_t _CurrentHave = 0;
+static int16_t _SpeedNeed = 0;
+static int16_t _SpeedHave = 0;
+static int16_t _TurnOnNeed = 0;
+static int16_t _TurnOnHave = 0;
 
 void Kernel::Tick()
 {
@@ -105,112 +113,63 @@ void Kernel::Tick()
 		return;
 	}
 
-	if (Hal::GetSpendTicks(_KernelTicks) < Hal::GetTicksInMilliSecond() * 10)
+	if (Hal::GetSpendTicks(_KernelTicks) < Hal::GetTicksInMilliSecond() * 100)
 		return;
+
+	_SendMetodHost->InitNewMetod((uint8_t)InterfaceMetodsMotorControl::StateGetSet);
+	_SendMetodHost->AddArgumentBool(_TurnOnNeed != 0 ? true : false);
+	_SendMetodHost->AddArgumentShort(_VoltageNeed);
+	_SendMetodHost->AddArgumentShort(_CurrentNeed);
+	_SendMetodHost->AddArgumentShort(_SpeedNeed);
+	_SendData();
 
 	Hal::LedBlue(!Hal::LedBlue());
 
 	_KernelTicks = Hal::GetTickCount();
 }
 
-static int16_t _Voltage = 0;
-static int16_t _Current = 0;
-static int16_t _Speed = 0;
-static int16_t _TurnOn = 0;
-
 void Kernel::_ProcessDataPacket()
 {
 
-	/*
 	auto mNum = _ReceiveMetodHost->GetMetodNumber();
 
-	if (_ProtocolHost->PacketAddr() != EmkAddr::MotorController)
+	if (_ProtocolHost->PacketAddr() != EmkAddr::Host)
 		return;
 
 	if ((EmkMetods)mNum == EmkMetods::Ping)
 	{
-		_ResponsePing();
 		return;
 	};
 
+	bool bVal = false;
+	int16_t sVal = 0;
 	switch ((InterfaceMetodsMotorControl)mNum)
 	{
-	case InterfaceMetodsMotorControl::Voltage:
-		_ReceiveMetodHost->GetArgumentShort(0, _Voltage);
-		break;
-	case InterfaceMetodsDisplay::Current:
-		_ReceiveMetodHost->GetArgumentShort(0, _Current);
-		break;
-	case InterfaceMetodsDisplay::Speed:
-		_ReceiveMetodHost->GetArgumentShort(0, _Speed);
-		break;
-	case InterfaceMetodsDisplay::Distance:
-		_ReceiveMetodHost->GetArgumentShort(0, _Distance);
-		break;
-	case InterfaceMetodsDisplay::DistanceTotal:
-		_ReceiveMetodHost->GetArgumentShort(0, _DistanceTotal);
-		break;
-	case InterfaceMetodsDisplay::DistanceRest:
-		_ReceiveMetodHost->GetArgumentShort(0, _DistanceRest);
-		break;
-	case InterfaceMetodsDisplay::Ah:
-		_ReceiveMetodHost->GetArgumentShort(0, _Ah);
-		break;
-	case InterfaceMetodsDisplay::AhTotal:
-		_ReceiveMetodHost->GetArgumentShort(0, _AhTotal);
-		break;
-	case InterfaceMetodsDisplay::Wh:
-		_ReceiveMetodHost->GetArgumentShort(0, _Wh);
-		break;
-	case InterfaceMetodsDisplay::WhTotal:
-		_ReceiveMetodHost->GetArgumentShort(0, _WhTotal);
-		break;
-	case InterfaceMetodsDisplay::Soc:
-		_ReceiveMetodHost->GetArgumentShort(0, _Soc);
-		break;
-	case InterfaceMetodsDisplay::Temperature1:
-		_ReceiveMetodHost->GetArgumentShort(0, _Temperature1); _Temperature1 /= 10;
-		break;
-	case InterfaceMetodsDisplay::Temperature2:
-		_ReceiveMetodHost->GetArgumentShort(0, _Temperature2); _Temperature2 /= 10;
-		break;
-	case InterfaceMetodsDisplay::Temperature3:
-		_ReceiveMetodHost->GetArgumentShort(0, _Temperature3); _Temperature3 /= 10;
-		break;
-	case InterfaceMetodsDisplay::Temperature4:
-		_ReceiveMetodHost->GetArgumentShort(0, _Temperature4); _Temperature4 /= 10;
-		break;
-	case InterfaceMetodsDisplay::BmsState:
-		{
-			int16_t sVal = 0;
-			_ReceiveMetodHost->GetArgumentShort(0, sVal);
-			_BmsState = ((uint16_t)sVal & 0xff);
-		}
-		break;
-	case InterfaceMetodsDisplay::Switches:
-		_ReceiveMetodHost->GetArgumentUshort(0, _Switches);
-		_SwitchesRcvd = true;
-		break;
-	case InterfaceMetodsDisplay::StatusBits:
-		_ReceiveMetodHost->GetArgumentUshort(0, _StatusBits);
-		break;
-	case InterfaceMetodsDisplay::ControllerErr:
-		_ReceiveMetodHost->GetArgumentShort(0, _ControllerError);
-		break;
-	case InterfaceMetodsDisplay::CellState:
-		_ReceiveMetodHost->GetArgumentByte(0, _CellStates[_CellStatesWPos].CellNum);
-		_ReceiveMetodHost->GetArgumentByte(1, _CellStates[_CellStatesWPos].CellState);
-		_ReceiveMetodHost->GetArgumentShort(2, _CellStates[_CellStatesWPos].Voltage);
-		_ReceiveMetodHost->GetArgumentShort(3, _CellStates[_CellStatesWPos].Temp);
-		_ReceiveMetodHost->GetArgumentShort(4, _CellStates[_CellStatesWPos].TempBal);
-		_ReceiveMetodHost->GetArgumentByte(5, _CellStates[_CellStatesWPos].Ver);
-		if (++_CellStatesWPos >= _CellStatesCacheSize)
-			_CellStatesWPos = 0;
+	case InterfaceMetodsMotorControl::StateGetSet:
+		if (_ReceiveMetodHost->GetArgumentBool(0, bVal))
+			_TurnOnHave = bVal ? 1 : 0;
+		if (_ReceiveMetodHost->GetArgumentShort(1, sVal))
+			_VoltageHave = sVal;
+		if (_ReceiveMetodHost->GetArgumentShort(2, sVal))
+			_CurrentHave = sVal;
+		if (_ReceiveMetodHost->GetArgumentShort(3, sVal))
+			_SpeedHave = sVal;
 		break;
 	default:
 		break;
 	};
-*/
+}
+
+bool Kernel::_TransmitEvent2Display(const char* evName, int16_t& val)
+{
+	if (val == VALUE_NULL)
+		return false;
+
+	while (!Hal::Usart->Redy4Send())
+		 osDelay(1);
+	Hal::Usart->Send("click %s,%i%c%c%c",evName,val,0xff,0xff,0xff);
+	val = VALUE_NULL;
+	return true;
 }
 
 bool Kernel::_TransmitValue2Display(const char* valName, int16_t& val)
@@ -232,14 +191,13 @@ void Kernel::TransmitData2Display()
 	if (Hal::GetSpendTicks(_TransmitData2DisplayTicks) < Hal::GetTicksInMilliSecond() * 100)
 		return;
 
-	_TransmitValue2Display("volt.val",_Voltage);
+	_TransmitValue2Display("volt.val",_VoltageHave);
 
-	_TransmitValue2Display("curr.val",_Current);
+	_TransmitValue2Display("curr.val",_CurrentHave);
 
-	_TransmitValue2Display("spd.val",_Speed);
+	_TransmitValue2Display("spd.val",_SpeedHave);
 
-	_TransmitValue2Display("turn.val",_TurnOn);
-
+	_TransmitEvent2Display("turn",_TurnOnHave);
 
 	_TransmitData2DisplayTicks = Hal::GetTickCount();
 }
@@ -291,13 +249,13 @@ void Kernel::ReceiveDataFromDisplay()
 	if (valName == NULL)
 		return;
 	if (strcmp(valName, "volt.val") == 0 )
-		_Voltage = value;
+		_VoltageNeed = value;
 	else if (strcmp(valName, "curr.val") == 0 )
-		_Current = value;
+		_CurrentNeed = value;
 	else if (strcmp(valName, "spd.val") == 0 )
-		_Speed = value;
+		_SpeedNeed = value;
 	else if (strcmp(valName, "turn.val") == 0 )
-		_TurnOn = value;
+		_TurnOnNeed = value;
 }
 
 volatile int _ReceivedPings = 0;
@@ -346,7 +304,6 @@ void Kernel::_SendData()
 
 	if (pos)
 	{
-		HAL_Delay(1); //ћежду приемом и отправкой должно быть не менее 100мк—ек
 		Hal::Rs485->Send(buff, pos);
 	}
 
