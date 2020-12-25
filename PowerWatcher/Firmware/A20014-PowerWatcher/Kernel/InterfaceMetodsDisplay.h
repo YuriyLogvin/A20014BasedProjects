@@ -123,7 +123,7 @@ enum class Switches
 template <typename T>
 bool operator &(const T& v1, const T& v2)
 		{
-			return ((uint32_t)v1 &(uint32_t)v1) != 0;
+			return ((uint32_t)v1 & (uint32_t)v2) != 0;
 		};
 
 #endif /* INTERFACEMETODSDISPLAY_H_ */

@@ -249,19 +249,19 @@ void Kernel::_ProcessDataPacket()
 		break;
 	case InterfaceMetodsDisplay::SwitchesInp:
 		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
-			_SwitchesInp = (SwitchesInp)usVal;
+			_SwitchesInp = (SwitchesInp)uiVal;
 		break;
 	case InterfaceMetodsDisplay::SwitchesOutp:
 		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
-			_SwitchesOutp = (SwitchesOutp)usVal;
+			_SwitchesOutp = (SwitchesOutp)uiVal;
 		break;
 	case InterfaceMetodsDisplay::Switches3:
 		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
-			_Switches3 = (Switches)usVal;
+			_Switches3 = (Switches)uiVal;
 		break;
 	case InterfaceMetodsDisplay::Switches4:
 		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
-			_Switches4 = (Switches)usVal;
+			_Switches4 = (Switches)uiVal;
 		break;
 	case InterfaceMetodsDisplay::ControllerErr:
 		_ReceiveMetodHost->GetArgumentShort(0, _ControllerError);
