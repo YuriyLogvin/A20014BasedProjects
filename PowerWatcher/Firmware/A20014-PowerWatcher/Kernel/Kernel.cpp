@@ -145,8 +145,8 @@ static int16_t _AhTotal = 0;
 static int16_t _Wh = 0;
 static int16_t _WhTotal = 0;
 static int16_t _Soc = 0;
-static Switches1 _Switches = Switches1::None;
-static Switches _Switches2 = Switches::None;
+static SwitchesInp _SwitchesInp = SwitchesInp::None;
+static SwitchesOutp _SwitchesOutp = SwitchesOutp::None;
 static Switches _Switches3 = Switches::None;
 static Switches _Switches4 = Switches::None;
 static int16_t _ControllerError = 0;
@@ -180,6 +180,7 @@ void Kernel::_ProcessDataPacket()
 
 	int16_t sVal = 0;
 	uint16_t usVal = 0;
+	uint32_t uiVal = 0;
 	if (mNum < (uint8_t)InterfaceMetodsDisplay::Size)
 		_ReceivedDataStates[mNum] = true;
 
@@ -246,20 +247,20 @@ void Kernel::_ProcessDataPacket()
 				_DriveStateError = sVal;
 		}
 		break;
-	case InterfaceMetodsDisplay::Switches:
-		if (_ReceiveMetodHost->GetArgumentUshort(0, usVal))
-			_Switches = (Switches1)usVal;
+	case InterfaceMetodsDisplay::SwitchesInp:
+		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
+			_SwitchesInp = (SwitchesInp)usVal;
 		break;
-	case InterfaceMetodsDisplay::Switches2:
-		if (_ReceiveMetodHost->GetArgumentUshort(0, usVal))
-			_Switches2 = (Switches)usVal;
+	case InterfaceMetodsDisplay::SwitchesOutp:
+		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
+			_SwitchesOutp = (SwitchesOutp)usVal;
 		break;
 	case InterfaceMetodsDisplay::Switches3:
-		if (_ReceiveMetodHost->GetArgumentUshort(0, usVal))
+		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
 			_Switches3 = (Switches)usVal;
 		break;
 	case InterfaceMetodsDisplay::Switches4:
-		if (_ReceiveMetodHost->GetArgumentUshort(0, usVal))
+		if (_ReceiveMetodHost->GetArgumentUint(0, uiVal))
 			_Switches4 = (Switches)usVal;
 		break;
 	case InterfaceMetodsDisplay::ControllerErr:
@@ -345,7 +346,7 @@ void Kernel::TransmitData2Display()
 	_TransmitValue2Display("cerr.val", _ControllerError, InterfaceMetodsDisplay::ControllerErr);
 
 	int16_t iVal = 0;
-	if (_ReceivedDataStates[(int16_t)InterfaceMetodsDisplay::Switches])
+	if (_ReceivedDataStates[(int16_t)InterfaceMetodsDisplay::SwitchesInp])
 	{
 		if (_GetDrvValue(iVal))
 			_TransmitValue2Display("drv.val", iVal);
@@ -357,7 +358,7 @@ void Kernel::TransmitData2Display()
 			_TransmitValue2Display("dir.val", iVal);
 	}
 
-	if (_ReceivedDataStates[(int16_t)InterfaceMetodsDisplay::Switches2])
+	if (_ReceivedDataStates[(int16_t)InterfaceMetodsDisplay::SwitchesOutp])
 	{
 		if (_GetBatHeatValue(iVal))
 			_TransmitValue2Display("bht.val", iVal);
@@ -436,7 +437,7 @@ bool Kernel::_GetChgValue(int16_t& val)
 		val = 1;
 		break;
 	case ChargeStates::Stopped:
-		if (_Switches & Switches1::PluggedIn)
+		if (_SwitchesInp & SwitchesInp::PluggedIn)
 			val = 2;
 		break;
 	case ChargeStates::Charged:
@@ -457,9 +458,9 @@ bool Kernel::_GetDirValue(int16_t& val)
 	 */
 	val = 0;
 
-	if (_Switches & Switches1::Forward)
+	if (_SwitchesInp & SwitchesInp::Forward)
 		val = 1;
-	else if (_Switches & Switches1::Backward)
+	else if (_SwitchesInp & SwitchesInp::Backward)
 		val = 2;
 
 	return true;

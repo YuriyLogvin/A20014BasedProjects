@@ -26,19 +26,20 @@ enum class InterfaceMetodsDisplay
 	ChargeState = 15,
 	VoltageExt = 16,
 	CurrentExt = 17,
-	//BmsState = 18, deprecated
-	CellState = 19,
-	//StatusBits = 20, deprecated
-	Temperature1 = 21,
-	Temperature2 = 22,
-	Temperature3 = 23,
-	Temperature4 = 24,
-	Switches = 25,
-	Switches2 = 26,
+	CellState = 18,
+	Temperature1 = 19,
+	Temperature2 = 20,
+	Temperature3 = 21,
+	Temperature4 = 22,
+	TemperatureController = 23,
+	TemperatureMotor = 24,
+	SwitchesInp = 25,
+	SwitchesOutp = 26,
 	Switches3 = 27,
 	Switches4 = 28,
 	ControllerErr = 29,
-	Size = 30
+	ChargerErr = 30,
+	Size = 31
 };
 
 enum class DriveStates
@@ -56,49 +57,73 @@ enum class ChargeStates
 	Error = 3
 };
 
-enum class Switches1
+enum class SwitchesInp
 {
 	None = 0,
-	Ignition = (0x1 << 1),
-	PluggedIn = (0x1 << 2),
-	Forward = (0x1 << 3),
-	Backward = (0x1 << 4),
-	Sw5 = (0x1 << 5),
-	Sw6 = (0x1 << 6),
-	Sw7 = (0x1 << 7),
-	Sw8 = (0x1 << 8),
-	Sw9 = (0x1 << 9),
-	Sw10 = (0x1 << 10),
-	Sw11 = (0x1 << 11),
-	Sw12 = (0x1 << 12),
-	Sw13 = (0x1 << 13),
-	Sw14 = (0x1 << 14),
-	Sw15 = (0x1 << 15)
+	Ignition = (0x1 << 0),
+	PluggedIn = (0x1 << 1),
+	Forward = (0x1 << 2),
+	Backward = (0x1 << 3),
+	Sw5 = (0x1 << 4),
+	Sw6 = (0x1 << 5),
+	Sw7 = (0x1 << 6),
+	Sw8 = (0x1 << 7),
+	Sw9 = (0x1 << 8),
+	Sw10 = (0x1 << 9),
+	Sw11 = (0x1 << 10),
+	Sw12 = (0x1 << 11),
+	Sw13 = (0x1 << 12),
+	Sw14 = (0x1 << 13),
+	Sw15 = (0x1 << 14),
+	Sw16 = (0x1 << 15)
 };
 
-bool operator &(const Switches1& v1, const Switches1& v2)
-		{
-			return ((uint8_t)v1 &(uint8_t)v1) != 0;
-		};
+enum class SwitchesOutp
+{
+	None = 0,
+	PowerOn = (0x1 << 0),
+	ChargeOn = (0x1 << 1),
+	Forward = (0x1 << 2),
+	Backward = (0x1 << 3),
+	DcDcOn = (0x1 << 4),
+	Sw6 = (0x1 << 5),
+	Sw7 = (0x1 << 6),
+	Thermostat1 = (0x1 << 7), //BattCooller, CarCooller, CarHeater, MotorFan, ControllerFan, BattHeater
+	Thermostat2 = (0x1 << 8),
+	Thermostat3 = (0x1 << 9),
+	Thermostat4 = (0x1 << 10),
+	VoltageRelay1 = (0x1 << 11), //SteerPump, VacuumPump
+	VoltageRelay2 = (0x1 << 12),
+	VoltageRelay3 = (0x1 << 13),
+	VoltageRelay4 = (0x1 << 14),
+	Sw16 = (0x1 << 15)
+};
 
 enum class Switches
 {
 	None = 0,
-	Sw1 = (0x1 << 1),
-	Sw2 = (0x1 << 2),
-	Sw3 = (0x1 << 3),
-	Sw4 = (0x1 << 4),
-	Sw5 = (0x1 << 5),
-	Sw6 = (0x1 << 6),
-	Sw7 = (0x1 << 7),
-	Sw8 = (0x1 << 8),
-	Sw9 = (0x1 << 9),
-	Sw10 = (0x1 << 10),
-	Sw11 = (0x1 << 11),
-	Sw12 = (0x1 << 12),
-	Sw13 = (0x1 << 13),
-	Sw14 = (0x1 << 14),
-	Sw15 = (0x1 << 15)
+	Sw1 = (0x1 << 0),
+	Sw2 = (0x1 << 1),
+	Sw3 = (0x1 << 2),
+	Sw4 = (0x1 << 3),
+	Sw5 = (0x1 << 4),
+	Sw6 = (0x1 << 5),
+	Sw7 = (0x1 << 6),
+	Sw8 = (0x1 << 7),
+	Sw9 = (0x1 << 8),
+	Sw10 = (0x1 << 9),
+	Sw11 = (0x1 << 10),
+	Sw12 = (0x1 << 11),
+	Sw13 = (0x1 << 12),
+	Sw14 = (0x1 << 13),
+	Sw15 = (0x1 << 14),
+	Sw16 = (0x1 << 15)
 };
+
+template <typename T>
+bool operator &(const T& v1, const T& v2)
+		{
+			return ((uint32_t)v1 &(uint32_t)v1) != 0;
+		};
 
 #endif /* INTERFACEMETODSDISPLAY_H_ */
